@@ -1,5 +1,5 @@
 # html-component
-A Web Component class base to handle connection between properties and attributes
+A Web Component base class to handle connection between properties and attributes
 
 # How to use it?
 Just extend the class in `htmlComponent.js` and create the following two mandatory getters inside your class, like this:
