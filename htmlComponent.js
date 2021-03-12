@@ -65,7 +65,7 @@ class HTMLComponent extends HTMLElement {
     __checkType__ (name, value, type) {
         if ((type == 'integer' && !Number.isInteger(value))
             || ((type == 'string' || type == 'boolean' || type == 'number')
-                 && !typeof value === type
+                 && !(typeof value === type)
             )
         ) {
             throw new TypeError(`Type of "${name}" is ${type}. Value given: ${value}`);
