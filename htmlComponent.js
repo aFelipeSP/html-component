@@ -96,12 +96,12 @@ class HTMLComponent extends HTMLElement {
     }
 
     __upgradeProperties__() {
-        for (let prop in Object.keys(this.props)) {
-            if (this.hasOwnProperty(prop)) {
-                let value = this[prop];
-                delete this[prop];
-                this[prop] = value;
-            }
-        }
+//         for (let prop in Object.keys(this.props)) {
+//             if (this.hasOwnProperty(prop)) {
+//                 let value = this[prop];
+//                 delete this[prop];
+//                 this[prop] = value;
+//             }
+//         }
     }
 }
