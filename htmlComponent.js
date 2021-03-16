@@ -2,20 +2,34 @@ class HTMLComponent extends HTMLElement {
     constructor() {
         super();
         let props = this.props || {};
+        this.__attrs__ = Object.entries(props).reduce((accum, [key, prop]) => {
+            let attr = prop.attr || this.__getDefaulAttr__(key);
+            accum[attr] = {name: key, prop};
+            return accum;
+        }, {});
+
+        this.__initialValues__ = {};
+        this.__initialValuesStarted__ = false;
+
         Object.defineProperties(this, Object.entries(props).reduce(
             (accum, [key, prop]) => {
+                if (this.hasOwnProperty(key))
+                    this.__initialValues__[key] = this[key];
                 accum[key] = {
                     get: () => {
-                        if (prop.type === 'boolean') {
-                            return this['_' + key] != null;
-                        } else {
-                            let val = this['_' + key];
-                            return val == null ? prop.default : val;
-                        }
+                        this.__setInitialValues__ ();
+                        let attr = prop.attr || this.__getDefaulAttr__(key);
+                        let attrValue = this.getAttribute(attr);
+                        if (
+                            (attrValue == null || attrValue === "")
+                            && prop.type != 'boolean'
+                        ) return prop.default;
+                        return this.__attrToProp__(attrValue, prop.type);
                     },
                     set: (v) => {
+                        this.__setInitialValues__ (key);
                         this.__checkType__(key, v, prop.type);
-                        let attr = prop.attr || this.__getPropDefault__(key);
+                        let attr = prop.attr || this.__getDefaulAttr__(key);
                         if (prop.type === 'boolean') {
                             if (v) this.setAttribute(attr, '');
                             else this.removeAttribute(attr);
@@ -27,81 +41,61 @@ class HTMLComponent extends HTMLElement {
                 return accum;
             }, {}
         ))
-
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (oldValue !== newValue) {
-            let [propName, prop] = this.__propFromAttr__(name);
-            let success = true;
-            let propValue;
-            if (prop.type != 'boolean') {
-                propValue = this.__attrToProp__(newValue, prop.type);
-                try {
-                    this.__checkType__(propName, propValue, prop.type);
-                } catch (error) {
-                    console.error(error);
-                    if (oldValue == null) this.removeAttribute(name); 
-                    else this.setAttribute(name, oldValue);
-                    success = false;
-                }
-            }
-            if (success) {
-                let value = (prop.type === 'boolean') ? newValue != null : (
-                    propValue == null ? prop.default : propValue
-                );
-                if (value != this['_' + propName]) {
-                    this['_' + propName] = value
-                    if (prop.handler) prop.handler.apply(this);
-                }
-            }
+    __setInitialValues__ (propSetting) {
+        if (this.__initialValuesStarted__) return;
+        this.__initialValuesStarted__ = true;
+        for (let key in this.__initialValues__) {
+            if (key === propSetting) continue;
+            this[key] = this.__initialValues__[key];
         }
     }
 
-    connectedCallback() {
-        this.__upgradeProperties__();
-    }
+    __getDefaulAttr__(prop) { return 'data-' + prop.toLowerCase(); }
 
     __checkType__ (name, value, type) {
-        if ((type == 'integer' && !Number.isInteger(value))
-            || ((type == 'string' || type == 'boolean' || type == 'number')
-                 && !(typeof value === type)
+        if (
+            (type == 'integer' && !Number.isInteger(value))
+            || (
+                (type == 'string' || type == 'boolean' || type == 'number')
+                && !(typeof value === type)
             )
         ) {
             throw new TypeError(`Type of "${name}" is ${type}. Value given: ${value}`);
         }
     }
 
-    __getPropDefault__(prop) {
-        return this.props[prop].attr || 'data-' + prop.toLowerCase();
+    __attrToProp__(value, type) {
+        if (type === 'number' || type === 'integer') return Number(value);
+        else if (type === 'boolean') return value != null;
+        else return value;
     }
 
-    __propFromAttr__(attr) {
-        for (let key in this.props) {
-            let prop = this.props[key];
-            if ((prop.attr || this.__getPropDefault__(key)) === attr) {
-                return [key, prop];
-            } 
-        }
-    }
-    
-    __attrToProp__ (value, type) {
-        if (type === 'number' || type === 'integer') {
-            return Number(value);
-        } else if (type === 'boolean') {
-            return value != null;
-        } else {
-            return value
-        }
-    }
+    connectedCallback() { this.__setInitialValues__(); }
 
-    __upgradeProperties__() {
-//         for (let prop in Object.keys(this.props)) {
-//             if (this.hasOwnProperty(prop)) {
-//                 let value = this[prop];
-//                 delete this[prop];
-//                 this[prop] = value;
-//             }
-//         }
+    attributeChangedCallback(name, oldValue, newValue) {
+        let attrElement = this.__attrs__[name];
+        let propName = attrElement.name, prop = attrElement.prop;
+
+        let __initialValuesStarted__ = this.__initialValuesStarted__;
+        this.__setInitialValues__ ();
+        if (!__initialValuesStarted__ && propName in this.__initialValues__) return;
+
+        if (oldValue !== newValue) {
+            if (propName == null) return;
+            if (prop.type != 'boolean') {
+                let propValue = this.__attrToProp__(newValue, prop.type);
+                try {
+                    this.__checkType__(propName, propValue, prop.type);
+                } catch (error) {
+                    console.error(error);
+                    if (oldValue == null) this.removeAttribute(attrName); 
+                    else this.setAttribute(attrName, oldValue);
+                    return;
+                }
+            }
+            if (prop.handler) prop.handler.apply(this);
+        }
     }
 }
