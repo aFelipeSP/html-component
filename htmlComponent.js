@@ -2,6 +2,7 @@ class HTMLComponent extends HTMLElement {
     constructor() {
         super();
         this.__attrs__ = {}
+        this.__refs__ = {}
         this.__initialValues__ = {};
         this.__initialValuesStarted__ = false;
 
@@ -99,4 +100,51 @@ class HTMLComponent extends HTMLElement {
                 prop.handler.apply(this, [oldValue, newValue]);
         }
     }
+    
+    __createElement__(tag, opts, children) {
+        const {id, on, attrs, name, props} = opts
+        const elem_ = typeof tag === 'string' ? document.createElement(tag) : tag
+
+        if (opts.class != null) elem_.className = opts.class
+        if (id != null) elem_.id = id
+        if (name != null ) this.__refs__[name] = elem_
+
+        for (const event in on || {}) {
+            elem_.addEventListener(event, on[event])
+        }
+
+        if (typeof children  === 'string') children = [children]
+        for (const child of children) {
+            if (typeof child  === 'string')
+                elem_.appendChild(document.createTextNode(child))
+            else if (Array.isArray(child)) {
+                elem_.appendChild(this.createElement(child))
+            }
+        }
+
+        for (const attr in attrs || {}) {
+            elem_.setAttribute(attr, attrs[attr])
+        }
+        for (const prop in props) {
+            elem_[prop] = props[prop]
+        }
+        return elem_
+    }
+
+    createElement(elem) {
+        let tag = 'div'
+        let opts = {}
+        let children = elem;
+        if (elem[0] instanceof Element || typeof elem[0] === 'string') {
+            tag = elem[0];
+            children = children.slice(1)
+        }
+        if (!Array.isArray(elem[1])) {
+            opts = elem[1];
+            children = children.slice(1)
+        }
+        return this.__createElement__(tag, opts, children)
+    }
+    
+    
 }
