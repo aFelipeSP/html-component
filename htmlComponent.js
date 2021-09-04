@@ -52,7 +52,9 @@ class HTMLComponent extends HTMLElement {
         }
     }
 
-    __getDefaulAttr__(prop) { return 'data-' + prop.toLowerCase(); }
+    __getDefaulAttr__(prop) {
+        return 'data-' + prop.replaceAll(/[A-Z]/g, l => `-${l.toLowerCase()}`);
+    }
 
     __checkType__ (name, value, type) {
         if (
