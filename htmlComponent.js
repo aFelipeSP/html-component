@@ -144,7 +144,5 @@ class HTMLComponent extends HTMLElement {
             children = children.slice(1)
         }
         return this.__createElement__(tag, opts, children)
-    }
-    
-    
+    }    
 }
