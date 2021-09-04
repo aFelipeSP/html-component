@@ -1,23 +1,20 @@
 class HTMLComponent extends HTMLElement {
     constructor() {
         super();
-        let props = this.props || {};
-        this.__attrs__ = Object.entries(props).reduce((accum, [key, prop]) => {
-            let attr = prop.attr || this.__getDefaulAttr__(key);
-            accum[attr] = {name: key, prop};
-            return accum;
-        }, {});
-
+        this.__attrs__ = {}
         this.__initialValues__ = {};
         this.__initialValuesStarted__ = false;
 
+        let props = this.props || {};
         Object.defineProperties(this, Object.entries(props).reduce(
             (accum, [key, prop]) => {
+                let attr = prop.attr || this.__getDefaulAttr__(key);
+                this.__attrs__[attr] = {name: key, prop};
                 if (this.hasOwnProperty(key))
                     this.__initialValues__[key] = this[key];
                 accum[key] = {
                     get: () => {
-                        this.__setInitialValues__ ();
+                        this.__setInitialValues__();
                         let attr = prop.attr || this.__getDefaulAttr__(key);
                         let attrValue = this.getAttribute(attr);
                         if (
@@ -27,7 +24,7 @@ class HTMLComponent extends HTMLElement {
                         return this.__attrToProp__(attrValue, prop.type);
                     },
                     set: (v) => {
-                        this.__setInitialValues__ (key);
+                        this.__setInitialValues__(key);
                         this.__checkType__(key, v, prop.type);
                         let attr = prop.attr || this.__getDefaulAttr__(key);
                         if (prop.type === 'boolean') {
@@ -43,7 +40,7 @@ class HTMLComponent extends HTMLElement {
         ))
     }
 
-    __setInitialValues__ (propSetting) {
+    __setInitialValues__(propSetting) {
         if (this.__initialValuesStarted__) return;
         this.__initialValuesStarted__ = true;
         for (let key in this.__initialValues__) {
@@ -56,15 +53,17 @@ class HTMLComponent extends HTMLElement {
         return 'data-' + prop.replaceAll(/[A-Z]/g, l => `-${l.toLowerCase()}`);
     }
 
-    __checkType__ (name, value, type) {
+    __checkType__(name, value, type) {
         if (
             (type == 'integer' && !Number.isInteger(value))
             || (
-                (type == 'string' || type == 'boolean' || type == 'number')
+                ['string', 'boolean', 'number'].includes(type)
                 && !(typeof value === type)
             )
         ) {
-            throw new TypeError(`Type of "${name}" is ${type}. Value given: ${value}`);
+            throw new TypeError(
+                `Type of "${name}" is ${type}. Value given: ${value}`
+            );
         }
     }
 
@@ -80,9 +79,10 @@ class HTMLComponent extends HTMLElement {
         let attrElement = this.__attrs__[name];
         let propName = attrElement.name, prop = attrElement.prop;
 
-        let __initialValuesStarted__ = this.__initialValuesStarted__;
-        this.__setInitialValues__ ();
-        if (!__initialValuesStarted__ && propName in this.__initialValues__) return;
+        let initialValuesStarted = this.__initialValuesStarted__;
+        this.__setInitialValues__();
+        if (!initialValuesStarted && propName in this.__initialValues__)
+            return;
 
         if (oldValue !== newValue) {
             if (propName == null) return;
@@ -97,7 +97,8 @@ class HTMLComponent extends HTMLElement {
                     return;
                 }
             }
-            if (prop.handler) prop.handler.apply(this);
+            if (prop.handler)
+                prop.handler.apply(this, [oldValue, newValue]);
         }
     }
 }
