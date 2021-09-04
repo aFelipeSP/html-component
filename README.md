@@ -57,7 +57,7 @@ The keys you define in getter `props` are going to be properties and attributes 
 
 A prop object can have also a `default` value, a `attr` to tell which html attribute is going to be synced with, and a `handler` function to tell what have to be done after a prop has been changed.
 
-If `attr` is not defined, the attribute that the prop is going to be synced to is going to be like this `data-${propName.toLowerCase()}`.
+If `attr` is not defined, the attribute that the prop is going to be synced to is going to be like this `data-${prop name in kebab case}`.
 
 The `attr` values for each prop must be included in the array returned by static getter method `observedAttributes` for synchronization to work.
 
