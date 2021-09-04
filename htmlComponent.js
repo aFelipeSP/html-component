@@ -15,7 +15,6 @@ class HTMLComponent extends HTMLElement {
                 accum[key] = {
                     get: () => {
                         this.__setInitialValues__();
-                        let attr = prop.attr || this.__getDefaulAttr__(key);
                         let attrValue = this.getAttribute(attr);
                         if (
                             (attrValue == null || attrValue === "")
@@ -26,7 +25,6 @@ class HTMLComponent extends HTMLElement {
                     set: (v) => {
                         this.__setInitialValues__(key);
                         this.__checkType__(key, v, prop.type);
-                        let attr = prop.attr || this.__getDefaulAttr__(key);
                         if (prop.type === 'boolean') {
                             if (v) this.setAttribute(attr, '');
                             else this.removeAttribute(attr);
