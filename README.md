@@ -15,7 +15,7 @@ class MyComponent extends HTMLComponent {
     ]
   }
   get props() {
-    return {,
+    return {
       intProp: {
         type: 'integer',
         default: 0,

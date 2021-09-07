@@ -135,11 +135,17 @@ class HTMLComponent extends HTMLElement {
         let tag = 'div'
         let opts = {}
         let children = elem;
-        if (elem[0] instanceof Element || typeof elem[0] === 'string') {
+        if (
+            elem[0] instanceof Element || elem[0] instanceof DocumentFragment
+            || typeof elem[0] === 'string'
+        ) {
             tag = elem[0];
             children = children.slice(1)
         }
-        if (!Array.isArray(elem[1])) {
+        if (
+            typeof elem[1] === 'object' && elem[1] != null
+            && !Array.isArray(elem[1])
+        ) {
             opts = elem[1];
             children = children.slice(1)
         }
