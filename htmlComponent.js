@@ -1,55 +1,52 @@
 class HTMLComponent extends HTMLElement {
     constructor() {
-        super();
+        super()
         this.__attrs__ = {}
         this.__refs__ = {}
-        this.__initialValues__ = {};
-        this.__initialValuesStarted__ = false;
+        this.__initialValues__ = {}
+        this.__initialValuesStarted__ = false
 
-        let props = this.props || {};
+        let props = this.props || {}
         Object.defineProperties(this, Object.entries(props).reduce(
             (accum, [key, prop]) => {
-                let attr = prop.attr || this.__getDefaulAttr__(key);
-                this.__attrs__[attr] = {name: key, prop};
+                let attr = prop.attr || this.__getDefaulAttr__(key)
+                this.__attrs__[attr] = {name: key, prop}
                 if (this.hasOwnProperty(key))
-                    this.__initialValues__[key] = this[key];
+                    this.__initialValues__[key] = this[key]
                 accum[key] = {
                     get: () => {
-                        this.__setInitialValues__();
-                        let attrValue = this.getAttribute(attr);
-                        if (
-                            (attrValue == null || attrValue === "")
-                            && prop.type != 'boolean'
-                        ) return prop.default;
-                        return this.__attrToProp__(attrValue, prop.type);
+                        this.__setInitialValues__()
+                        let v = this.getAttribute(attr)
+                        return (v == null || v === "") && prop.type != 'boolean'
+                            ? prop.default : this.__attrToProp__(v, prop.type)
                     },
                     set: (v) => {
-                        this.__setInitialValues__(key);
-                        this.__checkType__(key, v, prop.type);
+                        this.__setInitialValues__(key)
+                        this.__checkType__(key, v, prop.type)
                         if (prop.type === 'boolean') {
-                            if (v) this.setAttribute(attr, '');
-                            else this.removeAttribute(attr);
+                            if (v) this.setAttribute(attr, '')
+                            else this.removeAttribute(attr)
                         } else {
-                            this.setAttribute(attr, v);
+                            this.setAttribute(attr, v)
                         }
                     }
-                };
-                return accum;
+                }
+                return accum
             }, {}
         ))
     }
 
     __setInitialValues__(propSetting) {
-        if (this.__initialValuesStarted__) return;
-        this.__initialValuesStarted__ = true;
+        if (this.__initialValuesStarted__) return
+        this.__initialValuesStarted__ = true
         for (let key in this.__initialValues__) {
-            if (key === propSetting) continue;
-            this[key] = this.__initialValues__[key];
+            if (key === propSetting) continue
+            this[key] = this.__initialValues__[key]
         }
     }
 
     __getDefaulAttr__(prop) {
-        return 'data-' + prop.replaceAll(/[A-Z]/g, l => `-${l.toLowerCase()}`);
+        return 'data-' + prop.replaceAll(/[A-Z]/g, l => `-${l.toLowerCase()}`)
     }
 
     __checkType__(name, value, type) {
@@ -62,42 +59,42 @@ class HTMLComponent extends HTMLElement {
         ) {
             throw new TypeError(
                 `Type of "${name}" is ${type}. Value given: ${value}`
-            );
+            )
         }
     }
 
     __attrToProp__(value, type) {
-        if (type === 'number' || type === 'integer') return Number(value);
-        else if (type === 'boolean') return value != null;
-        else return value;
+        if (type === 'number' || type === 'integer') return Number(value)
+        else if (type === 'boolean') return value != null
+        else return value
     }
 
-    connectedCallback() { this.__setInitialValues__(); }
+    connectedCallback() { this.__setInitialValues__() }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        let attrElement = this.__attrs__[name];
-        let propName = attrElement.name, prop = attrElement.prop;
+        let attrElement = this.__attrs__[name]
+        let propName = attrElement.name, prop = attrElement.prop
 
-        let initialValuesStarted = this.__initialValuesStarted__;
-        this.__setInitialValues__();
+        let initialValuesStarted = this.__initialValuesStarted__
+        this.__setInitialValues__()
         if (!initialValuesStarted && propName in this.__initialValues__)
-            return;
+            return
 
         if (oldValue !== newValue) {
-            if (propName == null) return;
+            if (propName == null) return
             if (prop.type != 'boolean') {
-                let propValue = this.__attrToProp__(newValue, prop.type);
+                let propValue = this.__attrToProp__(newValue, prop.type)
                 try {
-                    this.__checkType__(propName, propValue, prop.type);
+                    this.__checkType__(propName, propValue, prop.type)
                 } catch (error) {
-                    console.error(error);
-                    if (oldValue == null) this.removeAttribute(attrName); 
-                    else this.setAttribute(attrName, oldValue);
-                    return;
+                    console.error(error)
+                    if (oldValue == null) this.removeAttribute(attrName) 
+                    else this.setAttribute(attrName, oldValue)
+                    return
                 }
             }
             if (prop.handler)
-                prop.handler.apply(this, [oldValue, newValue]);
+                prop.handler.apply(this, [oldValue, newValue])
         }
     }
     
@@ -134,19 +131,19 @@ class HTMLComponent extends HTMLElement {
     createElement(elem) {
         let tag = 'div'
         let opts = {}
-        let children = elem;
+        let children = elem
         if (
             elem[0] instanceof Element || elem[0] instanceof DocumentFragment
             || typeof elem[0] === 'string'
         ) {
-            tag = elem[0];
+            tag = elem[0]
             children = children.slice(1)
         }
         if (
             typeof elem[1] === 'object' && elem[1] != null
             && !Array.isArray(elem[1])
         ) {
-            opts = elem[1];
+            opts = elem[1]
             children = children.slice(1)
         }
         return this.__createElement__(tag, opts, children)

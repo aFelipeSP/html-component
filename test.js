@@ -38,20 +38,20 @@ class MyComponent extends HTMLComponent {
         default: 'hello world',
         attr: 'data-str-prop',
         handler() {
-          console.log(this.strProp);
+          this.__refs__.thing.innerText = this.strProp
         }
       }
     }
   }
 
-  constructor () {
+  constructor () { 
     super();
     this.attachShadow({mode: 'open'})
     this.createElement([this.shadowRoot,
-      ['div', 'label'],
-      ['input', {name: 'yo', props: {name: 'yo', value: 'asdf'}}]  
+      ['div', {name: 'thing'}],
+      ['input', {on: {input: ev => this.strProp = ev.target.value}}]  
     ])
-    console.log(this.__refs__)
+    console.log(this.__refs__) 
   }
 }
 
