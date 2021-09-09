@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "A Web Component base class to handle synchronization between properties and attributes",
   "main": "htmlComponent.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,7 +16,7 @@
     "web-component"
   ],
   "author": "Andres Felipe Sierra Parra",
-  "license": "MIT",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/aFelipeSP/html-component/issues"
   },

@@ -1,4 +1,4 @@
-class HTMLComponent extends HTMLElement {
+export default class HTMLComponent extends HTMLElement {
     constructor() {
         super()
         this.__attrs__ = {}
