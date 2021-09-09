@@ -44,6 +44,9 @@ class MyComponent extends HTMLComponent {
         type: 'string',
         default: 'hello world',
         attr: 'data-str-prop',
+        validator (value) {
+          return ['a', 'b'].includes(value)
+        },
         handler() {
           console.log(this.strProp);
         }
@@ -55,7 +58,7 @@ class MyComponent extends HTMLComponent {
 
 The keys you define in getter `props` are going to be properties and attributes synced with each other. Each key in props object should have an object containing at least property `type`, to tell how to convert from attribute (always a string) to property (any primitive).
 
-A prop object can have also a `default` value, a `attr` to tell which html attribute is going to be synced with, and a `handler` function to tell what have to be done after a prop has been changed.
+A prop object can have also a `default` value, a `attr` to tell which html attribute is going to be synced with, a `validator` that returns `true` if the new value (passed as argument) is valid and `false` otherwise, and a `handler` function to tell what have to be done after a prop has been changed.
 
 If `attr` is not defined, the attribute that the prop is going to be synced to is going to be like this `data-${prop name in kebab case}`.
 

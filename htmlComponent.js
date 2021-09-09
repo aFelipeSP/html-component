@@ -86,6 +86,10 @@ export default class HTMLComponent extends HTMLElement {
                 let propValue = this.__attrToProp__(newValue, prop.type)
                 try {
                     this.__checkType__(propName, propValue, prop.type)
+                    if (prop.validator)
+                        const valid = prop.validator.apply(this, [newValue])
+                        if (!valid)
+                            throw `Prop "${name}" value ${value} is not valid`
                 } catch (error) {
                     console.error(error)
                     if (oldValue == null) this.removeAttribute(attrName) 
