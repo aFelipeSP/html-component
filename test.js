@@ -1,3 +1,5 @@
+import HTMLComponent from "./htmlComponent.js";
+
 class MyComponent extends HTMLComponent {
   static get observedAttributes () {
     return [
@@ -28,10 +30,7 @@ class MyComponent extends HTMLComponent {
       boolProp: {
         type: 'boolean',
         default: true,
-        attr: 'data-bool-prop',
-        handler() {
-          console.log(this.boolProp);
-        }
+        attr: 'data-bool-prop'
       },
       strProp: {
         type: 'string',
