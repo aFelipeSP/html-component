@@ -102,7 +102,7 @@ export default class HTMLComponent extends HTMLElement {
                 }
             }
 
-            this.dispatchEvent(new CustomEvent('$' + key,
+            this.dispatchEvent(new CustomEvent('$' + propName,
                 {detail: {oldValue, newValue}}
             ))
         }
