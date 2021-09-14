@@ -11,6 +11,9 @@ export default class HTMLComponent extends HTMLElement {
             (accum, [key, prop]) => {
                 let attr = prop.attr || this.__getDefaulAttr__(key)
                 this.__attrs__[attr] = {name: key, prop}
+                this.addEventListener('$' + key, ev => {
+                    prop.handler.apply(this, ev.detail)
+                })
                 if (this.hasOwnProperty(key))
                     this.__initialValues__[key] = this[key]
                 accum[key] = {
@@ -98,8 +101,10 @@ export default class HTMLComponent extends HTMLElement {
                     return
                 }
             }
-            if (prop.handler)
-                prop.handler.apply(this, [oldValue, newValue])
+
+            this.dispatchEvent(new CustomEvent('$' + key,
+                {detail: {oldValue, newValue}}
+            ))
         }
     }
     
